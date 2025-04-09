@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L4Ativos Robô Assertiva</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>L4Ativos Robô Assertiva</h1>
+            <p class="subtitle">Consulte CNPJs/CPFs e gere relatórios CSV com facilidade e rapidez</p>
+        </header>
+
+        <div class="content">
+            <div class="card input-card">
+                <div class="card-header">
+                    <h2>Consulta de Documentos</h2>
+                    <div class="tipo-consulta">
+                        <label class="radio-container">
+                            <input type="radio" name="tipo-consulta" value="cnpj" checked>
+                            <span class="radio-checkmark"></span>
+                            <span class="radio-label">CNPJ</span>
+                        </label>
+                        <label class="radio-container">
+                            <input type="radio" name="tipo-consulta" value="cpf">
+                            <span class="radio-checkmark"></span>
+                            <span class="radio-label">CPF</span>
+                        </label>
+                    </div>
+                    <p class="card-description" id="descricao-consulta">Digite ou cole os CNPJs separados por vírgula ou linha</p>
+                </div>
+                <div class="card-content">
+                    <div id="notification" class="notification hidden">
+                        <span id="notification-icon" class="notification-icon"></span>
+                        <span id="notification-message"></span>
+                        <button id="notification-close" class="notification-close">×</button>
+                    </div>
+
+                    <textarea id="documentos" placeholder="Ex: 00.000.000/0001-00, 11.111.111/0001-11..."></textarea>
+
+                    <div id="opcoes-cpf" class="opcoes-adicionais hidden">
+                        <label for="finalidade">Finalidade da consulta:</label>
+                        <select id="finalidade">
+                            <option value="1">1 - Confirmação de identidade</option>
+                            <option value="2">2 - Ciclo de crédito</option>
+                            <option value="4">4 - Execução de contrato</option>
+                            <option value="5">5 - Legítimo interesse</option>
+                        </select>
+                    </div>
+
+                    <div id="historico-container" class="historico-container hidden">
+                        <div class="historico-titulo">
+                            Consultas recentes
+                            <div class="tooltip">
+                                <span class="tooltip-text">Clique em um item para carregar novamente</span>
+                            </div>
+                        </div>
+                        <div id="historico-lista" class="historico-lista">
+                            <!-- Itens do histórico serão adicionados aqui via JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button id="consultar-btn" class="btn primary-btn">
+                        <span class="btn-icon search-icon"></span>
+                        <span class="btn-text">Consultar</span>
+                    </button>
+                    <button id="gerar-csv-btn" class="btn secondary-btn">
+                        <span class="btn-icon download-icon"></span>
+                        <span class="btn-text">Gerar CSV</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="card results-card">
+                <div class="card-header">
+                    <h2>Resultados</h2>
+                    <div id="progresso-container" class="progresso-container hidden">
+                        <div class="progresso-info">
+                            <span id="progresso-texto">0%</span>
+                            <span id="tempo-estimado"></span>
+                        </div>
+                        <div class="progresso-barra-container">
+                            <div id="progresso-barra" class="progresso-barra"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="tabs">
+                        <div class="tabs-header">
+                            <button class="tab-btn active" data-tab="json">JSON</button>
+                            <button class="tab-btn" data-tab="table">Tabela</button>
+                        </div>
+                        <div class="tab-content active" id="json-tab">
+                            <div class="results-container">
+                                <pre id="resultados"></pre>
+                            </div>
+                        </div>
+                        <div class="tab-content" id="table-tab">
+                            <div class="results-container">
+                                <div id="table-resultados"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="loading" class="loading hidden">
+                        <div class="spinner"></div>
+                        <p>Processando sua solicitação...</p>
+                        <p id="loading-detail" class="loading-detail"></p>
+                    </div>
+                    <div id="empty-state" class="empty-state">
+                        <div class="empty-icon"></div>
+                        <p>Insira documentos e clique em "Consultar" para ver os resultados aqui</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
+

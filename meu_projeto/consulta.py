@@ -3,19 +3,15 @@ import requests
 # URL base da API
 BASE_URL = "https://api.assertivasolucoes.com.br/localize/v3/cnpj"
 
-# Cabeçalhos fixos
 HEADERS = {
     "Accept": "application/json"
 }
 
 # Token fixo - substitua pelo seu token válido quando necessário
 # Este token deve ser atualizado manualmente quando expirar
-TOKEN_FIXO = "98ef1e05-e4d9-461c-94eb-ca5750ef59bf"  # Substitua pelo seu token atual
+TOKEN_FIXO = "98ef1e05-e4d9-461c-94eb-ca5750ef59bf" 
 
-
-# Função para consultar um CNPJ
 def consultar_cnpj(cnpj):
-    # Usar o token fixo em vez de tentar obtê-lo automaticamente
     token = TOKEN_FIXO
 
     if not token:

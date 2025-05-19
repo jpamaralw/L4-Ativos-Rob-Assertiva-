@@ -2,11 +2,11 @@ import requests
 import time
 
 # Credenciais da API (substitua pelas suas)
-CLIENT_ID = "dMSL+6vmrpqHk5tC+Dv1mz+9nuMjV+SaO9WAQhOfrtP5YFBw8vDWs3x+8OAipQvhn+LI5pcUmuw2wjeJruJR+g=="
-CLIENT_SECRET = "5Uuc0Gj/3qcChhApXHaROYmg6vZKDhpigg9/v/Oknm1TOu5pn6AUfZDQ47sDMFFvWEPyML4/K7K9WUimBxfveg=="
+CLIENT_ID = "xxxx"
+CLIENT_SECRET = "xxxx"
 
 # Variável global para armazenar o token
-TOKEN = '790a0ec1-3ea1-4aaa-9399-debcb3d1045d'
+TOKEN = 'xxxx'
 EXPIRACAO = 0  # Tempo em que o token expira
 
 

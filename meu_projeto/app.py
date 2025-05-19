@@ -21,10 +21,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Criar a aplicação Flask
 app = Flask(__name__)
 
-# Configurar CORS para permitir todas as origens (para desenvolvimento local)
 CORS(app)
 
 # Diretório para armazenar arquivos CSV
@@ -33,14 +31,12 @@ os.makedirs(CSV_DIR, exist_ok=True)
 
 
 def limpar_cnpj(cnpj):
-    """Remove formatação do CNPJ"""
     if not cnpj:
         return ""
     return re.sub(r'[^\d]', '', str(cnpj))
 
 
 def limpar_telefone(telefone):
-    """Remove formatação do telefone"""
     if not telefone:
         return ""
     return re.sub(r'[^\d]', '', str(telefone))
@@ -54,25 +50,20 @@ def extrair_dados_cnpj(resultado):
     dados = {}
 
     try:
-        # Extrair dados do cabeçalho (apenas os relevantes)
         if isinstance(resultado.get('cabecalho'), str):
             cabecalho = json.loads(resultado.get('cabecalho', '{}'))
         else:
             cabecalho = resultado.get('cabecalho', {})
 
-        # Extrair dados da resposta
         if isinstance(resultado.get('resposta'), str):
             resposta = json.loads(resultado.get('resposta', '{}'))
         else:
             resposta = resultado.get('resposta', {})
 
-        # Dados cadastrais da empresa
+        # Dados empresa
         dados_cadastrais = resposta.get('dadosCadastrais', {})
-
-        # CNPJ sem formatação - IMPORTANTE: Garantir que seja tratado como string para evitar notação científica
         dados['CNPJ'] = limpar_cnpj(dados_cadastrais.get('cnpj', ''))
 
-        # Dados principais da empresa
         dados['Razao_Social'] = dados_cadastrais.get('razaoSocial', '')
         dados['Nome_Fantasia'] = dados_cadastrais.get('nomeFantasia', '')
         dados['Situacao_Cadastral'] = dados_cadastrais.get('situacaoCadastral', '')
@@ -80,13 +71,10 @@ def extrair_dados_cnpj(resultado):
         dados['Porte'] = dados_cadastrais.get('porteEmpresa', '')
         dados['Natureza_Juridica'] = dados_cadastrais.get('naturezaJuridica', '')
 
-        # Combinar CNAEs em uma única coluna
         cnaes = []
-        # CNAE Principal
         if dados_cadastrais.get('cnaeDescricao'):
             cnaes.append(dados_cadastrais.get('cnaeDescricao'))
 
-        # CNAEs secundárias
         cnaes_secundarias = resposta.get('cnaesSecundarias', [])
         for cnae in cnaes_secundarias:
             if cnae.get('descricao'):
@@ -98,31 +86,24 @@ def extrair_dados_cnpj(resultado):
         dados['Qtd_Funcionarios'] = dados_cadastrais.get('quantidadeFuncionarios', '')
         dados['Site'] = dados_cadastrais.get('site', '')
 
-        # Telefones (sem formatação)
         telefones = resposta.get('telefones', {})
 
-        # Telefones fixos
         fixos = telefones.get('fixos', [])
         for i, tel in enumerate(fixos[:2]):  # Limitar a 2 telefones
             dados[f'Telefone_Fixo_{i + 1}'] = limpar_telefone(tel.get('numero', ''))
 
-        # Telefones móveis
         moveis = telefones.get('moveis', [])
         for i, tel in enumerate(moveis[:2]):  # Limitar a 2 celulares
             dados[f'Telefone_Celular_{i + 1}'] = limpar_telefone(tel.get('numero', ''))
 
-        # Emails
         emails = resposta.get('emails', [])
         for i, email in enumerate(emails[:2]):  # Limitar a 2 emails
             dados[f'Email_{i + 1}'] = email.get('email', '')
 
-        # Combinar endereço em uma única coluna
         enderecos = resposta.get('enderecos', [])
         if enderecos:
-            end = enderecos[0]  # Pegar apenas o primeiro endereço
+            end = enderecos[0]  
             partes_endereco = []
-
-            # Adicionar apenas bairro, cidade e UF conforme solicitado
             if end.get('bairro'):
                 partes_endereco.append(end.get('bairro'))
             if end.get('cidade'):
@@ -134,9 +115,8 @@ def extrair_dados_cnpj(resultado):
         else:
             dados['Endereco'] = ""
 
-        # Sócios (com dados mais organizados)
         socios = resposta.get('socios', [])
-        for i, socio in enumerate(socios[:3]):  # Limitar a 3 sócios
+        for i, socio in enumerate(socios[:3]):  
             prefix = f'Socio_{i + 1}'
             dados[f'{prefix}_Nome'] = socio.get('nomeOuRazaoSocial', '')
             dados[f'{prefix}_CPF_CNPJ'] = limpar_cnpj(socio.get('documento', ''))
@@ -169,13 +149,10 @@ def extrair_dados_cpf(resultado):
         else:
             resposta = resultado.get('resposta', {})
 
-        # Dados cadastrais da pessoa
+        # Dados 
         dados_cadastrais = resposta.get('dadosCadastrais', {})
-
-        # CPF sem formatação - IMPORTANTE: Garantir que seja tratado como string sem formatação
         dados['CPF'] = limpar_cnpj(dados_cadastrais.get('cpf', ''))
 
-        # Dados principais da pessoa
         dados['Nome'] = dados_cadastrais.get('nome', '')
         dados['Sexo'] = dados_cadastrais.get('sexo', '')
         dados['Data_Nascimento'] = dados_cadastrais.get('dataNascimento', '')
@@ -185,20 +162,16 @@ def extrair_dados_cpf(resultado):
         dados['Situacao_Cadastral'] = dados_cadastrais.get('situacaoCadastral', '')
         dados['Nome_Mae'] = dados_cadastrais.get('maeNome', '')
 
-        # Telefones
         telefones = resposta.get('telefones', {})
 
-        # Telefones fixos - usar limpar_telefone para garantir formato sem caracteres especiais
         fixos = telefones.get('fixos', [])
         for i, tel in enumerate(fixos[:2]):
             dados[f'Telefone_Fixo_{i + 1}'] = limpar_telefone(tel.get('numero', ''))
 
-        # Telefones móveis - usar limpar_telefone para garantir formato sem caracteres especiais
         moveis = telefones.get('moveis', [])
         for i, tel in enumerate(moveis[:2]):
             dados[f'Telefone_Celular_{i + 1}'] = limpar_telefone(tel.get('numero', ''))
 
-        # Endereço
         enderecos = resposta.get('enderecos', [])
         if enderecos:
             end = enderecos[0]
@@ -297,7 +270,7 @@ def gerar_csv():
     data = request.json
     tipo = data.get("tipo", "cnpj")  # Tipo de consulta: cnpj ou cpf
     documentos = data.get("documentos", [])
-    id_finalidade = data.get("idFinalidade", 1)  # Padrão: Confirmação de identidade
+    id_finalidade = data.get("idFinalidade", 1)  
 
     if not documentos:
         return jsonify({"erro": "Nenhum documento enviado"}), 400
@@ -307,7 +280,6 @@ def gerar_csv():
     total = len(documentos)
     tempo_inicio_total = time.time()
 
-    # Garantir que o diretório CSV existe
     os.makedirs(CSV_DIR, exist_ok=True)
 
     logger.info(f"Iniciando processamento de {total} {tipo.upper()}(s) para CSV")
@@ -354,10 +326,8 @@ def gerar_csv():
         return jsonify({"erro": erro_msg}), 400
 
     try:
-        # Criar DataFrame com todos os resultados
         df = pd.DataFrame(resultados)
 
-        # Verificar se há dados no DataFrame
         if df.empty:
             return jsonify({"erro": "Nenhum dado válido para gerar CSV"}), 400
 
@@ -366,8 +336,6 @@ def gerar_csv():
         file_name = f"resultados_{tipo}_{timestamp}.csv"
         file_path = os.path.join(CSV_DIR, file_name)
 
-        # Salvar CSV com encoding UTF-8 e separador ponto e vírgula
-        # Importante: usar float_format para evitar notação científica
         df.to_csv(file_path, index=False, encoding='utf-8-sig', sep=';', float_format='%.0f')
 
         logger.info(f"Arquivo CSV gerado com sucesso: {file_path}")
